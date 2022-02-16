@@ -9,6 +9,13 @@ require('dotenv').config()
 const { TOKEN } = process.env
 
 
+const errorLogger = e => {
+    fs.appendFile(path.join(__dirname, 'databases/errors.log'), `${e}\n\n`, e => {
+        if (e) return console.error(e)
+    })
+}
+
+
 function start(links) {
     let index = 0
 
@@ -34,12 +41,12 @@ function start(links) {
 
             fs.appendFile(path.join(__dirname, 'databases/olx.csv'), `${TITLE}\t${COST}\t${NAME}\t${ADDRESS}\t${phones}\n`, e => {
                 if (e) {
-                    console.error(e)
+                    errorLogger(e)
                     return clearInterval(interval)
                 }
             })
         } catch (e) {
-            console.error(e)
+            errorLogger(e)
             return clearInterval(interval)
         }
     }, 5_000)
@@ -54,4 +61,3 @@ fs.readFile(path.join(__dirname, 'databases/urls.txt'), 'utf8', (e, links) => {
 
     start(links)
 })
-
