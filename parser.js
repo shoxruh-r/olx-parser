@@ -1,3 +1,4 @@
+'use strict'
 const cheerio = require('cheerio')
 const axios = require('axios')
 const fs = require('fs')
@@ -8,17 +9,14 @@ require('dotenv').config()
 const { TOKEN } = process.env
 
 
-async function start(links) {
-    let i = 0
+function start(links) {
+    let index = 0
 
-    console.log("Boshlandi!")
-    
     const interval = setInterval(async () => {
-        if (i === links.length)
-            return clearInterval(interval)
+        if (index >= links.length) return clearInterval(interval)
 
         try {
-            const page = await axios.get(links[i++])
+            const page = await axios.get(links[index++])
 
             const $ = cheerio.load(page.data)
             const TITLE = $('h1').text().replaceAll('\n', ' ')
@@ -27,19 +25,24 @@ async function start(links) {
             const ADDRESS = $('li.css-7dfllt:last-child a.css-tyi2d1').text().split(' - ')[1]
             const ID = $('span.css-9xy3gn-Text').text().replace('ID: ', '')
 
+
             const { data: { data: { phones } } } = await axios.get(`https://www.olx.uz/api/v1/offers/${ID}/limited-phones/`, {
-                headers: { Authorization: 'Bearer ' + TOKEN }
+                headers: { Authorization: `Bearer ${TOKEN}` }
             })
 
             if (!phones.length) return
 
             fs.appendFile(path.join(__dirname, 'databases/olx.csv'), `${TITLE}\t${COST}\t${NAME}\t${ADDRESS}\t${phones}\n`, e => {
-                if (e) return console.error(e)
+                if (e) {
+                    console.error(e)
+                    return clearInterval(interval)
+                }
             })
         } catch (e) {
-            return console.error(e)
+            console.error(e)
+            return clearInterval(interval)
         }
-    }, 5000)
+    }, 5_000)
 }
 
 
