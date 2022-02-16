@@ -32,7 +32,6 @@ function start(links) {
             const ADDRESS = $('li.css-7dfllt:last-child a.css-tyi2d1').text().split(' - ')[1]
             const ID = $('span.css-9xy3gn-Text').text().replace('ID: ', '')
 
-
             const { data: { data: { phones } } } = await axios.get(`https://www.olx.uz/api/v1/offers/${ID}/limited-phones/`, {
                 headers: { Authorization: `Bearer ${TOKEN}` }
             })
@@ -47,7 +46,6 @@ function start(links) {
             })
         } catch (e) {
             errorLogger(e)
-            return clearInterval(interval)
         }
     }, 5_000)
 }
